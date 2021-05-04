@@ -1,4 +1,4 @@
-//Destructuring de objetos
+//Destructuring de objetos: sirve para guardar en variables los datos de un objeto
 const producto = {
     nombre: "MacBook 13 M1",
     precio: 29999,

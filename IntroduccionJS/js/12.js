@@ -1,5 +1,5 @@
 "use strict"; // Hace que el compilador see mas estricto y nos informe de mas errores logicos
-// Objetos freeze y seal
+// Objetos freeze y seal: Sirve para que un objeto se pueda o no modificar
 const producto = {
     nombre: "MacBook 13 M1",
     precio: 29999,
