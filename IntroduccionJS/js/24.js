@@ -16,12 +16,12 @@ console.log(num === str); // false
 if(puntaje === 1000) { 
     console.log('Si el puntaje es 1000');   
 } else {
-     console.log('No es igual')
+     console.log('No es igual');
  }
 
 
  if(puntaje2 !== 1000) { 
-    console.log('No es igual')
+    console.log('No es igual');
  } else {
     console.log('Si el puntaje es 1000');
  }
@@ -43,5 +43,5 @@ if(rol === 'ADMINISTRADOR') {
 } else if(rol === 'EDITOR') {
     console.log('Eres editor, puedes entrar pero no puedes hacer mucho')
 } else {
-    console.log('No tienes acceso')
+    console.log('No tienes acceso');
 }
