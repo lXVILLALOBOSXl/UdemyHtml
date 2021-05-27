@@ -4,6 +4,8 @@ const { series, src, dest, watch, parallel } = require('gulp'); //Importar la de
 const sass = require('gulp-sass'); //El paquete solo tiene una funcion
 const imagemin = require('gulp-imagemin');
 const notify = require('gulp-notify');
+const webp = require('gulp-webp');
+const concat = require('gulp-concat');
 
 //Funcion que compila SASS
 // function css( done ){ 
@@ -11,8 +13,14 @@ const notify = require('gulp-notify');
 
 //     done();
 // }
+
+const paths = {
+    imagenes: 'src/img/**/*',
+    scss: 'src/scss/**/*.scss',
+    js: 'src/js/**/*.js'
+}
 function css( ){ 
-    return src('src/scss/app.scss')
+    return src(paths.scss)
     .pipe(sass({
         outputStyle: 'expanded'
     }))
@@ -20,25 +28,41 @@ function css( ){
 }
 
 function minificarCss( ){ 
-    return src('src/scss/app.scss')
+    return src(paths.scss)
     .pipe(sass({
         outputStyle: 'compressed'
     }))
     .pipe(dest('./build/css'))
 }
 
+function javascript(){
+    return src(paths.js)
+        .pipe( concat('bundle.js'))
+        .pipe(dest('./build/js'))
+}
+
 function imagenes(){
-    return src('src/img/**/*')
+    return src(paths.imagenes)
         .pipe(imagemin())
         .pipe(dest('./build/img'))
-        .pipe( notify({ message: 'Imagen Minificada'}) );
+        .pipe( notify({message: 'Imagen Minificada'}) );
+}
+
+function versionWebp(){
+    return src(paths.imagenes)
+        .pipe(webp())
+        .pipe( dest ('./build/img'))
+        .pipe( notify({message: 'Version webP lista'}) );
 }
 
 function watchArchivo( ){ //Ejecuta una funcion cada vez que identifique un cambio en el archivo como argumento
-   watch('src/scss/**/*.scss', css); //El * indica todos los archivos que tengan la extension siguiente del asterisco en la ruta especificada y el ** todos los archivos de la carpeta incluso carpetas
+   watch(paths.scss, css); //El * indica todos los archivos que tengan la extension siguiente del asterisco en la ruta especificada y el ** todos los archivos de la carpeta incluso carpetas
+   watch(paths.js, javascript)
 }
+
 exports.css = css;
 exports.minificarCss = minificarCss;
-exports.watchArchivo = watchArchivo;
 exports.imagenes = imagenes;
-exports.default = series( css, imagenes, watchArchivo);
+exports.watchArchivo = watchArchivo;
+
+exports.default = series( css, javascript, imagenes, versionWebp, watchArchivo);
