@@ -14,6 +14,16 @@ const concat = require('gulp-concat');
 //     done();
 // }
 
+//Utilidades css
+const autoprefixer = require('autoprefixer');
+const postcss =require('gulp-postcss');
+const cssnano =  require('cssnano');
+const sourcemaps = require('gulp-sourcemaps');
+
+//Utilidades js
+const terser = require('gulp-terser-js');
+const rename = require('gulp-rename');
+
 const paths = {
     imagenes: 'src/img/**/*',
     scss: 'src/scss/**/*.scss',
@@ -21,9 +31,10 @@ const paths = {
 }
 function css( ){ 
     return src(paths.scss)
-    .pipe(sass({
-        outputStyle: 'expanded'
-    }))
+    .pipe(sourcemaps.init())
+    .pipe(sass({outputStyle: 'expanded'}))
+    .pipe(postcss([autoprefixer(), cssnano() ]))
+    .pipe(sourcemaps.write('.'))
     .pipe(dest('./build/css'))
 }
 
@@ -37,7 +48,11 @@ function minificarCss( ){
 
 function javascript(){
     return src(paths.js)
+        .pipe(sourcemaps.init())
         .pipe( concat('bundle.js'))
+        .pipe (terser())
+        .pipe(sourcemaps.write('.'))
+        .pipe(rename({suffix : '.min'}))
         .pipe(dest('./build/js'))
 }
 
