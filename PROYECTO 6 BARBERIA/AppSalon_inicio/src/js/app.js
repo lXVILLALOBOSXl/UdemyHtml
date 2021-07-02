@@ -1,4 +1,11 @@
 let pagina = 1;
+const cita = {
+    nombre: '',
+    fecha: '',
+    hora: '',
+    servicios: []
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     iniciarApp();
 });
@@ -12,11 +19,25 @@ function iniciarApp(){
     //Paginacion siguiente y anterior
     paginaSiguiente();
     paginaAnterior();
+    //  Comprueba la pagina actual para ocultar o mostrar la paginacion
+    botonesPaginador();
+    // Muestra el resumen de la cita ( o mensaje de error en caso de no pasar la validacion )
+    mostrarResumen();
 }
 
 function mostrarSeccion(){
+    //Eliminar mostrar-seccion de la seccion anterior
+    const seccionAnterior  = document.querySelector('.mostrar-seccion');
+    if(seccionAnterior){
+        seccionAnterior.classList.remove('mostrar-seccion');
+    }
     const seccionActual = document.querySelector(`#paso-${pagina}`);
     seccionActual.classList.add('mostrar-seccion');
+    //Eliminar la clase de actual en el tab anterior
+    const tabAnterior = document.querySelector('.tabs .actual');
+    if(tabAnterior){
+        tabAnterior.classList.remove('actual');
+    }
     // Resalta el Tab actual
     const tab = document.querySelector(`[data-paso="${pagina}"]`);
     tab.classList.add('actual');
@@ -28,16 +49,9 @@ function cambiarSeccion(){
         enlace.addEventListener('click', e => {
             e.preventDefault();
             pagina = parseInt(e.target.dataset.paso);
-            //Eliminar mostrar-seccion de la seccion anterior
-            document.querySelector('.mostrar-seccion').classList.remove('mostrar-seccion');
-            //Agrega mostrar-seleccion donde dimos click
-            const seccion = document.querySelector(`#paso-${pagina}`);
-            seccion.classList.add('mostrar-seccion');
-            //Eliminar la clase de actual en el tab anterior
-            document.querySelector('.tabs .actual').classList.remove('actual');
-            //Agregar la clase de actual en el nuevo tab 
-            const tab = document.querySelector(`[data-paso="${pagina}"]`);
-            tab.classList.add('actual');
+            //Llama la funcion de mostrar seccion
+            mostrarSeccion();
+            botonesPaginador();
         })
     })
 }
@@ -93,15 +107,45 @@ function seleccionarServicio(e){
 
 function paginaSiguiente(){
     const paginaSiguiente = document.querySelector('#siguiente');
-    paginaSiguiente.addEventListener('click,', () => {
+    paginaSiguiente.addEventListener('click', () => {
         pagina++;
+        botonesPaginador();
     });
 }
 
 function paginaAnterior(){
     const paginaAnterior = document.querySelector('#anterior');
-    paginaAnterior.addEventListener('click,', () => {
+    paginaAnterior.addEventListener('click', () => {
         pagina--;
+        botonesPaginador();
     });
+}
 
+function botonesPaginador(){
+    const paginaSiguiente = document.querySelector('#siguiente');
+    const paginaAnterior = document.querySelector('#anterior');
+    if(pagina === 1){
+        paginaAnterior.classList.add('ocultar');
+    }else if(pagina === 2){
+        paginaAnterior.classList.remove('ocultar');
+        paginaSiguiente.classList.remove('ocultar');
+    }else if(pagina === 3){
+        paginaSiguiente.classList.add('ocultar');
+        paginaAnterior.classList.remove('ocultar');
+    }
+    mostrarSeccion(); // Cambia la seccion que se muestra por la de la pagina
+}
+
+function mostrarResumen(){
+    //Destructuring
+    const {nombre, fecha, hora, servicios} = cita;
+    //Seleccionar el resumen 
+    const resumenDiv = document.querySelector('.contenido-resumen');
+    if(Object.values(cita).includes('')){
+        const noServicios = document.createElement('P');
+        noServicios.textContent = "Faltan datos de servicios, hora, fecha o nombre";
+        noServicios.classList.add('invalidar-cita');
+        //Agregar a resumen Div
+        resumenDiv.appendChild(noServicios);
+    }
 }
