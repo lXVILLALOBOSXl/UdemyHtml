@@ -17,3 +17,14 @@
         border: none;
     }
 }
+
+.alerta{
+    padding: $separacion / 2;
+    text-align: center;
+    width: 100%;
+    display: block;
+    color: $blanco;
+    &.error{
+        background-color: rgb(194,0,0);
+    }
+}

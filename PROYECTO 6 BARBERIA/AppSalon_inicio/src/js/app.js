@@ -23,6 +23,12 @@ function iniciarApp(){
     botonesPaginador();
     // Muestra el resumen de la cita ( o mensaje de error en caso de no pasar la validacion )
     mostrarResumen();
+    //Almacena el nombre de la cita en el objeto
+    nombreCita();
+    //Almacena la fecha de la cita en el pbjeto
+    fechaCita();
+    // DEshabilita dias pasados
+    deshabilitarFechaAnterior();
 }
 
 function mostrarSeccion(){
@@ -76,6 +82,7 @@ async function mostrarServicios(){
             //Generar div contenedor de servicio
             const servicioDiv = document.createElement("DIV");
             servicioDiv.classList.add('servicio');
+            servicioDiv.dataset.idServicio = id;
             //Selecciona un servicio para la cita
             servicioDiv.onclick = seleccionarServicio;
             //Inyectar precio y nomgbre al div de servicio.
@@ -97,12 +104,30 @@ function seleccionarServicio(e){
     } else {
         elemento = e.target;
     }
-
     if (elemento.classList.contains('seleccionado')){
         elemento.classList.remove('seleccionado');
+        const id = parseInt(elemento.dataset.idServicio);
+        eliminarServcio(id);
     } else {
         elemento.classList.add('seleccionado');
+        const servicioObj ={
+            id: parseInt( elemento.dataset.idServicio ),
+            nombre: elemento.firstElementChild.textContent,
+            precio: elemento.firstElementChild.nextElementSibling.textContent
+        }
+        agregarServicio(servicioObj);
     }
+}
+
+function eliminarServcio(id){
+    const {servicios} = cita;
+    cita.servicios = servicios.filter( servicio => servicio.id !== id );
+}
+
+function agregarServicio(servicioObj){
+    const {servicios} = cita;
+    cita.servicios = [...servicios, servicioObj];
+
 }
 
 function paginaSiguiente(){
@@ -148,4 +173,72 @@ function mostrarResumen(){
         //Agregar a resumen Div
         resumenDiv.appendChild(noServicios);
     }
+}
+
+function nombreCita(){
+    const nombreInput = document.querySelector('#nombre');
+    nombreInput.addEventListener('input', e => {
+        const nombreTexto = e.target.value.trim();
+        //Validacion de que nombreTexto debe tener algo 
+        if(nombreTexto === '' || nombreTexto.length < 3){
+            mostrarAlerta('Nombre no valido', 'error')
+        }
+        else{
+            const alerta = document.querySelector('.alerta');
+            if(alerta){
+                alerta.remove();
+            }
+            cita.nombre = nombreTexto;
+        }
+    });
+}
+
+function mostrarAlerta(mensaje, tipo){
+    //Si hay una alerta previa, entonces no crear otra
+    const alertaPrevia = document.querySelector('.alerta');
+    if(alertaPrevia){
+        return;
+    }
+    const alerta = document.createElement('DIV');
+    alerta.textContent = mensaje;
+    alerta.classList.add('alerta');
+
+    if(tipo === 'error'){
+        alerta.classList.add('error');
+    }
+    //Insertar en el html
+    const formulario = document.querySelector('.formulario');
+    formulario.appendChild(alerta);
+    //Eliminar la alerta despues de 3 segundos
+    setTimeout(() => {
+        alerta.remove();
+    }, 3000);
+
+}
+
+function fechaCita(){
+    const fechaInput = document.querySelector("#fecha");
+    fechaInput.addEventListener('input', e => {
+        const dia = new Date(e.target.value).getUTCDay();
+        if([0,6].includes(dia)){
+            e.preventDefault();
+            fechaInput.value = '';
+            mostrarAlerta('Fines de Semana no son permitidos', 'error');
+        }else{
+            cita.fecha = fechaInput.value;
+        }
+    });
+
+}
+
+function deshabilitarFechaAnterior(){
+    const inputFecha = document.querySelector('#fecha');
+
+    const fechaAhora = new Date();
+    const year = fechaAhora.getFullYear();
+    const mes = fechaAhora.getMonth() + 1;
+    const dia = fechaAhora.getDate() + 1;
+    const fechaDeshabilitar = `${year}-${mes}-${dia}`;
+
+    inputFecha.min = fechaDeshabilitar;
 }
