@@ -29,6 +29,8 @@ function iniciarApp(){
     fechaCita();
     // DEshabilita dias pasados
     deshabilitarFechaAnterior();
+    // Almacena la hora de la cita en el objeto
+    horaCita();
 }
 
 function mostrarSeccion(){
@@ -157,6 +159,8 @@ function botonesPaginador(){
     }else if(pagina === 3){
         paginaSiguiente.classList.add('ocultar');
         paginaAnterior.classList.remove('ocultar');
+        mostrarResumen(); // Estamos en la página 3, carga el resumen de la cita
+        console.log(cita);
     }
     mostrarSeccion(); // Cambia la seccion que se muestra por la de la pagina
 }
@@ -166,13 +170,59 @@ function mostrarResumen(){
     const {nombre, fecha, hora, servicios} = cita;
     //Seleccionar el resumen 
     const resumenDiv = document.querySelector('.contenido-resumen');
+    //Limpia el HTML previo
+    while(resumenDiv.firstChild){
+        resumenDiv.removeChild( resumenDiv.firstChild );
+    }
+    // Validacion del objeto
     if(Object.values(cita).includes('')){
         const noServicios = document.createElement('P');
         noServicios.textContent = "Faltan datos de servicios, hora, fecha o nombre";
         noServicios.classList.add('invalidar-cita');
         //Agregar a resumen Div
         resumenDiv.appendChild(noServicios);
+        return;
     }
+    const headingCita = document.createElement('H3');
+    headingCita.textContent = 'Resumen de Cita';
+    //Mostrar el resumen
+    const nombreCita = document.createElement('P');
+    nombreCita.innerHTML = `<span>Nombre:</span> ${nombre}`;
+    const fechaCita = document.createElement('P');
+    fechaCita.innerHTML = `<span>Fecha:</span> ${fecha}`;
+    const horaCita = document.createElement('P');
+    horaCita.innerHTML = `<span>Hora:</span> ${hora}`;
+    const serviciosCita = document.createElement('DIV');
+    serviciosCita.classList.add('resumen-servicios');
+    const headingServicios = document.createElement('H3');
+    headingServicios.textContent = 'Resumen de Servicios';
+    serviciosCita.appendChild(headingServicios);
+    //Iterar sobre el arreglo de servicios
+    let cantidad = 0;
+    servicios.forEach( servicio => {
+        const { nombre, precio } = servicio;
+        const contenedorServicio = document.createElement('DIV');
+        contenedorServicio.classList.add('contenedor-servicio');
+        const textoServicio = document.createElement('P');
+        textoServicio.textContent = nombre;
+        const precioServicio = document.createElement('P');
+        precioServicio.textContent = precio;
+        precioServicio.classList.add('precio');
+        const totalServicio = precio.split('$');
+        cantidad += parseInt( totalServicio[1].trim());
+        contenedorServicio.appendChild(textoServicio);
+        contenedorServicio.appendChild(precioServicio);
+        serviciosCita.appendChild(contenedorServicio);
+    });
+    resumenDiv.appendChild(headingCita);
+    resumenDiv.appendChild(nombreCita);
+    resumenDiv.appendChild(fechaCita);
+    resumenDiv.appendChild(horaCita);
+    resumenDiv.appendChild(serviciosCita);
+    const cantidadPagar = document.createElement('P');
+    cantidadPagar.classList.add('total');
+    cantidadPagar.innerHTML = `<span>Total a Pagar:  </span> $ ${cantidad}`;
+    resumenDiv.appendChild(cantidadPagar);
 }
 
 function nombreCita(){
@@ -233,12 +283,26 @@ function fechaCita(){
 
 function deshabilitarFechaAnterior(){
     const inputFecha = document.querySelector('#fecha');
-
     const fechaAhora = new Date();
     const year = fechaAhora.getFullYear();
     const mes = fechaAhora.getMonth() + 1;
     const dia = fechaAhora.getDate() + 1;
     const fechaDeshabilitar = `${year}-${mes}-${dia}`;
-
     inputFecha.min = fechaDeshabilitar;
+}
+
+function horaCita() {
+    const inputHora = document.querySelector('#hora');
+    inputHora.addEventListener('input', e => {
+        const horaCita = e.target.value;
+        const hora = horaCita.split(':');
+        if(hora[0] < 10 || hora[0] > 18 ) {
+            mostrarAlerta('Hora no válida', 'error');
+            setTimeout(() => {
+                inputHora.value = '';
+            }, 3000);
+        } else {
+            cita.hora = horaCita;
+        }
+    });
 }
